@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function MissionCard({
   userName,
@@ -23,6 +24,7 @@ export default function MissionCard({
   const [reflectionText, setReflectionText] = useState("");
   const [savedReflection, setSavedReflection] = useState("");
   const [showCelebration, setShowCelebration] = useState(false);
+  const [resourceRead, setResourceRead] = useState(false);
 
   const existingReflection = useMemo(
     () => (getReflection ? getReflection(currentDay) : ""),
@@ -34,6 +36,7 @@ export default function MissionCard({
       setSavedReflection(existingReflection);
       setReflectionText(existingReflection);
     }
+    setResourceRead(false);
   }, [existingReflection]);
 
   return (
@@ -97,12 +100,21 @@ export default function MissionCard({
           </div>
           <button
             onClick={() => {
+              window.open(activeMission.url, "_blank", "noreferrer");
+              setResourceRead(true);
+            }}
+            className="w-full rounded-xl border border-gold-500/40 bg-gold-500/10 px-4 py-3 text-sm font-semibold text-gold-500 transition hover:border-gold-500 hover:bg-gold-500/20"
+          >
+            {`Read ${activeMission.scripture || "todays resource"}`}
+          </button>
+          <button
+            onClick={() => {
               onCompleteMission();
               setShowReflection(true);
             }}
-            disabled={!!savedReflection}
+            disabled={!!savedReflection || !resourceRead}
             className={`w-full rounded-xl px-4 py-3 text-sm font-semibold transition ${
-              savedReflection
+              savedReflection || !resourceRead
                 ? "cursor-not-allowed bg-white/10 text-gray-400"
                 : "bg-gold-500 text-slate-900 hover:bg-gold-400"
             }`}
@@ -146,7 +158,7 @@ export default function MissionCard({
                     setSavedReflection(reflectionText.trim());
                     setShowReflection(false);
                     setShowCelebration(true);
-                    setTimeout(() => setShowCelebration(false), 1600);
+                    setTimeout(() => setShowCelebration(false), 4600);
                   }}
                   className="mt-4 w-full rounded-xl border border-gold-500/40 bg-gold-500/10 px-4 py-2 text-xs font-semibold text-gold-500 transition hover:border-gold-500 hover:bg-gold-500/20"
                 >
@@ -155,13 +167,16 @@ export default function MissionCard({
               </div>
             </div>
           )}
-          {showCelebration && (
-            <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center">
-              <div className="mt-6 rounded-full bg-gold-500/20 px-6 py-3 text-sm font-semibold text-gold-500 shadow-[0_0_30px_rgba(234,179,8,0.35)] animate-pulse">
-                🎉 Mission Completed!
-              </div>
-            </div>
-          )}
+          {showCelebration &&
+            typeof document !== "undefined" &&
+            createPortal(
+              <div className="pointer-events-none fixed inset-0 z-[80] flex items-start justify-center">
+                <div className="mt-6 rounded-3xl bg-gold-500 px-16 py-10 text-3xl font-semibold text-slate-900 shadow-[0_0_30px_rgba(234,179,8,0.35)]">
+                  🎉 Mission Completed!
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
       )}
     </section>
