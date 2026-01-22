@@ -75,6 +75,9 @@ export default function App() {
   const [recoveryState, setRecoveryState] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [catchUpStartDay, setCatchUpStartDay] = useState(null);
+  const showDebug =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("dev") === "true";
 
   const isMonth1Theme =
     isStarterFinished && masteryMonth === 1 && masteryDay >= 1;
@@ -310,7 +313,7 @@ export default function App() {
       </div>
 
       <Navigation currentPage={currentPage} onChange={setCurrentPage} />
-      {import.meta.env.DEV && (
+      {showDebug && (
         <DeveloperToolbar
           userName={userName}
           onUpdateName={setUserName}
