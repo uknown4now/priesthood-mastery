@@ -1,0 +1,54 @@
+[
+  {
+    "id": "sacrament-bread",
+    "title": "The Sacrament (Bread)",
+    "office": "Aaronic",
+    "steps": [
+      "Prepare the sacrament table with clean cloth and trays.",
+      "Break the bread into small pieces and reverently cover the trays.",
+      "Kneel and offer the sacrament prayer over the bread.",
+      "Pass the bread to the congregation in an orderly, quiet manner."
+    ],
+    "prayer": "O God, the Eternal Father, we ask thee in the name of thy Son, Jesus Christ, to bless and sanctify this bread to the souls of all those who partake of it; that they may eat in remembrance of the body of thy Son, and witness unto thee, O God, the Eternal Father, that they are willing to take upon them the name of thy Son, and always remember him and keep his commandments which he has given them; that they may always have his Spirit to be with them. Amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18?lang=eng"
+  },
+  {
+    "id": "sacrament-water",
+    "title": "The Sacrament (Water)",
+    "office": "Aaronic",
+    "steps": [
+      "Prepare the water trays and reverently cover them.",
+      "Kneel and offer the sacrament prayer over the water.",
+      "Pass the water to the congregation in a quiet, steady manner.",
+      "Return trays and restore the table with reverence."
+    ],
+    "prayer": "O God, the Eternal Father, we ask thee in the name of thy Son, Jesus Christ, to bless and sanctify this water to the souls of all those who drink of it; that they may do it in remembrance of the blood of thy Son, which was shed for them; that they may witness unto thee, O God, the Eternal Father, that they do always remember him, that they may have his Spirit to be with them. Amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18?lang=eng"
+  },
+  {
+    "id": "administering-sick",
+    "title": "Administering to the Sick",
+    "office": "Melchizedek",
+    "steps": [
+      "Consecrate olive oil for the anointing, if it has not been prepared.",
+      "Two or more Melchizedek Priesthood holders place hands on the head.",
+      "One holder anoints with oil and states the anointing by authority.",
+      "Another holder seals the anointing and gives a blessing as guided."
+    ],
+    "prayer": "Brother/Sister [Name], by the authority of the Melchizedek Priesthood, I anoint you with this oil that has been consecrated for the healing of the sick.\n\nBrother/Sister [Name], by the authority of the Melchizedek Priesthood, we seal this anointing upon you and bless you according to the inspiration of the Holy Ghost.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18?lang=eng"
+  },
+  {
+    "id": "confirmation",
+    "title": "Confirmation (Gift of the Holy Ghost)",
+    "office": "Melchizedek",
+    "steps": [
+      "Confirm the member of record by name.",
+      "State the ordinance: confirmation and bestowal of the Holy Ghost.",
+      "Give a blessing as prompted by the Spirit.",
+      "Close in the name of Jesus Christ."
+    ],
+    "prayer": "Brother/Sister [Name], in the name of Jesus Christ, and by the authority of the Melchizedek Priesthood, we confirm you a member of The Church of Jesus Christ of Latter-day Saints and say unto you: Receive the Holy Ghost.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18?lang=eng"
+  }
+]

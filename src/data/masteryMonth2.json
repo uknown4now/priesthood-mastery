@@ -1,0 +1,44 @@
+{
+  "Aaronic": {
+    "title": "The Gatekeeper",
+    "weeks": [
+      {
+        "title": "The Spirit of the Sacrament",
+        "focus": "Deep dive into the mechanics and the sanctity of the table."
+      },
+      {
+        "title": "The Law of the Fast",
+        "focus": "Understanding the Bishop’s storehouse and temporal service."
+      },
+      {
+        "title": "The Gospel of Repentance",
+        "focus": "How the Aaronic Priesthood prepares people for the remission of sins."
+      },
+      {
+        "title": "The Ministering of Angels",
+        "focus": "Understanding the specific key found in D&C 13."
+      }
+    ]
+  },
+  "Melchizedek": {
+    "title": "The Healer",
+    "weeks": [
+      {
+        "title": "Faith to Heal",
+        "focus": "The doctrinal requirements for miracles and the will of God."
+      },
+      {
+        "title": "The Physicality of Blessings",
+        "focus": "Practice and protocols for anointing and sealing."
+      },
+      {
+        "title": "Discerning the Spirit",
+        "focus": "Learning to listen for the words the Lord wants said in a blessing."
+      },
+      {
+        "title": "The Compassionate Shepherd",
+        "focus": "Ministering to the sick, the elderly, and those in crisis."
+      }
+    ]
+  }
+}

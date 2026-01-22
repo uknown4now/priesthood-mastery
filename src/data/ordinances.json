@@ -1,0 +1,110 @@
+[
+  {
+    "id": "sacrament-bread",
+    "category": "Aaronic",
+    "title": "Sacrament Prayer: Bread",
+    "steps": [
+      "Kneel or stand reverently.",
+      "The person offering the prayer must speak the words exactly as written.",
+      "The Bishopric confirms the prayer is spoken correctly."
+    ],
+    "Prayer": "O God, the Eternal Father, we ask thee in the name of thy Son, Jesus Christ, to bless and sanctify this bread to the souls of all those who partake of it, that they may eat in remembrance of the body of thy Son, and witness unto thee, O God, the Eternal Father, that they are willing to take upon them the name of thy Son, and always remember him and keep his commandments which he has given them; that they may always have his Spirit to be with them. Amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number31"
+  },
+  {
+    "id": "sacrament-water",
+    "category": "Aaronic",
+    "title": "Sacrament Prayer: Water",
+    "steps": [
+      "Kneel or stand reverently.",
+      "The person offering the prayer must speak the words exactly as written."
+    ],
+    "Prayer": "O God, the Eternal Father, we ask thee in the name of thy Son, Jesus Christ, to bless and sanctify this water to the souls of all those who drink of it, that they may do it in remembrance of the blood of thy Son, which was shed for them; that they may witness unto thee, O God, the Eternal Father, that they do always remember him, that they may have his Spirit to be with them. Amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number31"
+  },
+  {
+    "id": "baptism",
+    "category": "Aaronic",
+    "title": "Baptism",
+    "steps": [
+      "Hold the person's right wrist with your left hand.",
+      "The person holds your left wrist with their left hand.",
+      "Raise your right arm to the square.",
+      "Immerse the person completely, including clothing."
+    ],
+    "Prayer": "Having been commissioned of Jesus Christ, I baptize you in the name of the Father, and of the Son, and of the Holy Ghost. Amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number21"
+  },
+  {
+    "id": "consecrating-oil",
+    "category": "Melchizedek",
+    "title": "Consecrating Oil",
+    "steps": [
+      "Hold an open container of pure olive oil.",
+      "Address Heavenly Father.",
+      "State that you are acting by the authority of the Melchizedek Priesthood."
+    ],
+    "Prayer": "Note: There is no set prayer. The person (1) addresses Heavenly Father, (2) states the priesthood authority, (3) consecrates the oil and sets it apart for anointing the sick, and (4) closes in the name of Jesus Christ.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number34"
+  },
+  {
+    "id": "administering-sick-anointing",
+    "category": "Melchizedek",
+    "title": "Administering: Anointing",
+    "steps": [
+      "A Melchizedek Priesthood holder puts a drop of consecrated oil on the person's head.",
+      "Place hands on the head and call the person by their full name.",
+      "State that you are acting by the authority of the Melchizedek Priesthood."
+    ],
+    "Prayer": "[Full Name], by the authority of the Melchizedek Priesthood, I anoint your head with oil that has been consecrated for anointing and blessing the sick and afflicted. In the name of Jesus Christ, amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number35"
+  },
+  {
+    "id": "administering-sick-sealing",
+    "category": "Melchizedek",
+    "title": "Administering: Sealing",
+    "steps": [
+      "Usually two or more holders place hands on the head.",
+      "State that you are sealing the anointing.",
+      "Give a blessing as the Spirit directs."
+    ],
+    "Prayer": "[Full Name], by the authority of the Melchizedek Priesthood, we seal and confirm this anointing... [Give blessing as guided by the Spirit]... In the name of Jesus Christ, amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number35"
+  },
+  {
+    "id": "confirmation",
+    "category": "Melchizedek",
+    "title": "Confirmation",
+    "steps": [
+      "Place hands on the person's head.",
+      "Address the person by their full name.",
+      "State that the ordinance is by authority of the Melchizedek Priesthood."
+    ],
+    "Prayer": "[Full Name], in the name of Jesus Christ and by the authority of the Melchizedek Priesthood, we confirm you a member of The Church of Jesus Christ of Latter-day Saints and say unto you, receive the Holy Ghost. [Add blessing as directed]... In the name of Jesus Christ, amen.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number22"
+  },
+  {
+    "id": "naming-blessing-child",
+    "category": "Melchizedek",
+    "title": "Naming and Blessing a Child",
+    "steps": [
+      "Hold the child in a circle (or hands on head for older child).",
+      "Address Heavenly Father.",
+      "Give the child a name."
+    ],
+    "Prayer": "Note: (1) Address Heavenly Father, (2) State authority, (3) Give the name, (4) Give a blessing as directed, (5) Close in the name of Jesus Christ.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number18"
+  },
+  {
+    "id": "dedicating-grave",
+    "category": "Melchizedek",
+    "title": "Dedicating a Grave",
+    "steps": [
+      "Authorized by the priesthood officer conducting the service.",
+      "Address Heavenly Father.",
+      "Dedicate and consecrate the burial plot."
+    ],
+    "Prayer": "Note: (1) Address Heavenly Father, (2) State authority, (3) Dedicate the plot as the resting place for the body, (4) Pray for protection until the Resurrection, (5) Close in the name of Jesus Christ.",
+    "link": "https://www.churchofjesuschrist.org/study/manual/general-handbook/18-priesthood-ordinances-and-blessings?lang=eng#title_number41"
+  }
+]
