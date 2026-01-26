@@ -26,8 +26,10 @@ export default function Dashboard({
   badges,
   manualCompletedDays,
   phaseStatus,
+  graceDays,
   habits,
   onToggleHabit,
+  habitTotals,
   weeklyHabitsCount,
   progressDay,
   progressPercent,
@@ -132,6 +134,25 @@ export default function Dashboard({
     return count;
   }, []);
 
+  const momentumScore = useMemo(() => {
+    const completedDays = manualCompletedDays || [];
+    const excusedMap = graceDays || {};
+    const excusedDays = Object.keys(excusedMap).map((day) => Number(day));
+    const catchUpCompleted = completedDays.filter((day) =>
+      excusedDays.includes(day)
+    ).length;
+    const normalCompleted = completedDays.length - catchUpCompleted;
+    let missedDays = 0;
+    for (let day = 1; day < (activeDay || 1); day += 1) {
+      if (completedDays.includes(day)) continue;
+      if (excusedDays.includes(day)) continue;
+      missedDays += 1;
+    }
+    const score =
+      normalCompleted * 5 + catchUpCompleted * 3 + missedDays * -10;
+    return Math.max(0, Math.min(100, score));
+  }, [activeDay, graceDays, manualCompletedDays]);
+
   const catchUpSaved = catchUpDay
     ? getReflection?.(catchUpDay) || ""
     : "";
@@ -178,6 +199,21 @@ export default function Dashboard({
           today.
         </div>
       )}
+
+      <section className="mb-4 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-4 backdrop-blur-xl">
+        <p className="text-xs uppercase tracking-[0.2em] text-gold-500">
+          Priesthood Momentum
+        </p>
+        <p className="mt-2 text-sm text-gray-300">
+          Momentum Score: {momentumScore}/100
+        </p>
+        <div className="mt-3 h-3 w-full rounded-full bg-white/10">
+          <div
+            className="h-3 rounded-full bg-gold-500 transition-all duration-700"
+            style={{ width: `${momentumScore}%` }}
+          />
+        </div>
+      </section>
 
       {isCatchUpMode() && (
         <div className="mb-4 rounded-2xl border border-gold-500/40 bg-gold-500/10 px-4 py-3 text-sm text-gold-500">
@@ -448,6 +484,8 @@ export default function Dashboard({
           onOpenMission={onOpenMission}
           missionCompleted={missionCompleted}
           onCompleteMission={onCompleteMission}
+          habits={habits}
+          onToggleHabit={onToggleHabit}
           getReflection={getReflection}
           saveReflection={saveReflection}
         />
@@ -455,7 +493,11 @@ export default function Dashboard({
 
       {!masteryComplete && !(activeDay === 7 && !isStarterFinished) && (
         <>
-          <HabitTracker habits={habits} onToggle={onToggleHabit} />
+          <HabitTracker
+            habits={habits}
+            onToggle={onToggleHabit}
+            habitTotals={habitTotals}
+          />
 
           <DynamicPhaseTracker
             currentDay={activeDay || 1}

@@ -1,10 +1,13 @@
+import HabitToggleButton from "./HabitToggleButton.jsx";
+import HabitMomentumCircles from "./HabitMomentumCircles.jsx";
+
 const HABITS = [
   { key: "scripture", label: "Scripture", icon: BookIcon },
   { key: "prayer", label: "Prayer", icon: HandsIcon },
   { key: "service", label: "Service", icon: HeartIcon }
 ];
 
-export default function HabitTracker({ habits, onToggle }) {
+export default function HabitTracker({ habits, onToggle, habitTotals }) {
   const completedCount = Object.values(habits).filter(Boolean).length;
 
   return (
@@ -17,20 +20,19 @@ export default function HabitTracker({ habits, onToggle }) {
         {HABITS.map(({ key, label, icon: Icon }) => {
           const isActive = habits[key];
           return (
-            <button
+            <HabitToggleButton
               key={key}
-              onClick={() => onToggle(key)}
-              className={`flex flex-col items-center gap-2 rounded-xl border px-2 py-3 text-xs font-medium transition ${
-                isActive
-                  ? "border-gold-500/80 bg-gold-500/20 text-gold-500"
-                  : "border-white/10 bg-[rgba(var(--color-surface),0.8)] text-gray-200 hover:border-white/30"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </button>
+              habitKey={key}
+              label={label}
+              icon={Icon}
+              isActive={isActive}
+              onToggle={onToggle}
+            />
           );
         })}
+      </div>
+      <div className="mt-5">
+        <HabitMomentumCircles size={56} counts={habitTotals} refreshKey={habits} />
       </div>
     </section>
   );

@@ -22,6 +22,7 @@ const LAST_COMPLETED_KEY = "priesthood.lastCompletedDay";
 const GRACE_DAYS_KEY = "priesthood.graceDays";
 const MANUAL_COMPLETED_KEY = "priesthood.manualCompletedDays";
 const MANUAL_COMPLETION_COUNT_KEY = "priesthood.manualCompletionCount";
+const MANUAL_COMPLETION_DATES_KEY = "priesthood.manualCompletionDates";
 const PHASE_KEYS = {
   phase1: "phase1_complete",
   phase2: "phase2_complete",
@@ -125,6 +126,9 @@ export function MissionProvider({ children }) {
   );
   const [manualCompletionCount, setManualCompletionCount] = useState(() =>
     loadFromStorage(MANUAL_COMPLETION_COUNT_KEY, 0)
+  );
+  const [manualCompletionDates, setManualCompletionDates] = useState(() =>
+    loadFromStorage(MANUAL_COMPLETION_DATES_KEY, [])
   );
 
   const offices = curriculum.starter_pack;
@@ -256,6 +260,13 @@ export function MissionProvider({ children }) {
     );
   }, [manualCompletionCount]);
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      MANUAL_COMPLETION_DATES_KEY,
+      JSON.stringify(manualCompletionDates)
+    );
+  }, [manualCompletionDates]);
+
   const missionState = useMemo(() => {
     if (!selectedOffice || !offices[selectedOffice]) {
       return {
@@ -328,6 +339,11 @@ export function MissionProvider({ children }) {
     setManualCompletionCount((prev) => prev + 1);
     updatePhaseStatusIfComplete(day, nextManual);
     clearGraceDay(day);
+    setManualCompletionDates((prev) => {
+      const todayKey = getTodayKey();
+      if (prev.includes(todayKey)) return prev;
+      return [...prev, todayKey];
+    });
   };
 
   const allDays = useMemo(() => {
@@ -991,6 +1007,7 @@ export function MissionProvider({ children }) {
     window.localStorage.removeItem(GRACE_DAYS_KEY);
     window.localStorage.removeItem(MANUAL_COMPLETED_KEY);
     window.localStorage.removeItem(MANUAL_COMPLETION_COUNT_KEY);
+    window.localStorage.removeItem(MANUAL_COMPLETION_DATES_KEY);
     window.localStorage.removeItem(USER_NAME_KEY);
     setSelectedOffice(null);
     setUserName("");
@@ -1025,6 +1042,7 @@ export function MissionProvider({ children }) {
     setGraceDays({});
     setManualCompletedDays([]);
     setManualCompletionCount(0);
+    setManualCompletionDates([]);
   };
 
   const debugCompleteMonth = () => {

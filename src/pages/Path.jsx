@@ -28,6 +28,7 @@ export default function Path({
   const [reflectionText, setReflectionText] = useState("");
   const [starterCollapsed, setStarterCollapsed] = useState(isStarterFinished);
   const [expandedMonth, setExpandedMonth] = useState(null);
+  const [habitsByDay, setHabitsByDay] = useState({});
 
   const selectedMission = useMemo(() => {
     if (!selectedOffice || !selectedDay) return null;
@@ -50,6 +51,18 @@ export default function Path({
     }
   }, [isStarterFinished]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const stored = JSON.parse(
+        window.localStorage.getItem("priesthood.habitsByDay") || "{}"
+      );
+      setHabitsByDay(stored || {});
+    } catch (error) {
+      setHabitsByDay({});
+    }
+  }, []);
+
   const days = selectedOffice ? offices[selectedOffice] : [];
   const activeMonth = masteryMonth || 1;
   const activeMasteryDay = masteryDay || 1;
@@ -69,6 +82,24 @@ export default function Path({
   const isExcused = (dayId) => Boolean(graceMap?.[dayId]);
   const isManuallyCompleted = (dayId) => manualDays.includes(dayId);
   const isReviewMode = (dayId) => dayId < currentDay;
+  const selectedHabits = selectedMission
+    ? habitsByDay?.[selectedMission.id] || {}
+    : {};
+  const getWeekMomentum = (dayId) => {
+    const weekStart = Math.floor((dayId - 1) / 7) * 7 + 1;
+    const weekDays = Array.from({ length: 7 }).map((_, idx) => weekStart + idx);
+    let score = 0;
+    weekDays.forEach((id) => {
+      if (manualDays.includes(id)) {
+        score += 5;
+      } else if (isExcused(id)) {
+        score += 2;
+      } else if (id < currentDay) {
+        score -= 10;
+      }
+    });
+    return Math.max(0, Math.min(100, score));
+  };
   const isCatchUpMode = () => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem("priesthood.catchUpMode") === "true";
@@ -158,6 +189,13 @@ export default function Path({
                     const isMissed =
                       dayItem.day < currentDay && !isCompleted && !excused;
                     const isActive = !isLocked;
+                    const weekMomentum = getWeekMomentum(dayItem.day);
+                    const iconTone =
+                      weekMomentum >= 70
+                        ? "shadow-[0_0_10px_rgba(234,179,8,0.4)]"
+                        : weekMomentum <= 30
+                          ? "opacity-50 grayscale"
+                          : "";
                     return (
                       <button
                         key={dayItem.day}
@@ -171,7 +209,9 @@ export default function Path({
                             : "border-white/10 bg-[rgba(var(--color-surface),0.8)] text-gray-100 hover:border-gold-500/60"
                         } ${isCurrent ? "border-gold-500/60 shadow-[0_0_20px_rgba(234,179,8,0.25)]" : ""}`}
                       >
-                        <div className="absolute -left-6 top-4 flex h-4 w-4 items-center justify-center rounded-full border border-white/20 bg-slate-900">
+                        <div
+                          className={`absolute -left-6 top-4 flex h-4 w-4 items-center justify-center rounded-full border border-white/20 bg-slate-900 ${iconTone}`}
+                        >
                           {isCompleted && <CheckIcon className="h-3 w-3 text-gold-500" />}
                           {excused && !isCompleted && (
                             <span className="h-2 w-2 rounded-full border border-dashed border-gold-500" />
@@ -359,6 +399,13 @@ export default function Path({
                   const isLocked = dayNumber > activeMasteryDay;
                   const isMissed =
                     overallDay < currentDay && !isCompleted && !excused;
+                  const weekMomentum = getWeekMomentum(overallDay);
+                  const iconTone =
+                    weekMomentum >= 70
+                      ? "shadow-[0_0_8px_rgba(234,179,8,0.4)]"
+                      : weekMomentum <= 30
+                        ? "opacity-50 grayscale"
+                        : "";
                   return (
                     <button
                       key={`day-${dayNumber}`}
@@ -374,13 +421,17 @@ export default function Path({
                     >
                       <span>Day {dayNumber}</span>
                       {isCompleted && (
-                        <CheckIcon className="mt-1 h-3 w-3 text-gold-500" />
+                        <CheckIcon className={`mt-1 h-3 w-3 text-gold-500 ${iconTone}`} />
                       )}
                       {excused && !isCompleted && (
-                        <span className="mt-1 h-3 w-3 rounded-full border border-dashed border-gold-500/80" />
+                        <span
+                          className={`mt-1 h-3 w-3 rounded-full border border-dashed border-gold-500/80 ${iconTone}`}
+                        />
                       )}
                       {isMissed && (
-                        <span className="mt-1 h-3 w-3 rounded-full border border-gray-500/60" />
+                        <span
+                          className={`mt-1 h-3 w-3 rounded-full border border-gray-500/60 ${iconTone}`}
+                        />
                       )}
                       {isLocked && <span className="mt-1 text-[10px]">Locked</span>}
                     </button>
@@ -518,6 +569,32 @@ export default function Path({
                   )}
                 </div>
               )}
+
+            {selectedMission && (
+              <div className="mt-5 rounded-2xl border border-white/10 bg-[rgba(var(--color-surface),0.8)] p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                  Habits for this Day
+                </p>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-semibold">
+                  {[
+                    { key: "scripture", label: "Scripture" },
+                    { key: "prayer", label: "Prayer" },
+                    { key: "service", label: "Service" }
+                  ].map((habit) => (
+                    <div
+                      key={habit.key}
+                      className={`rounded-xl px-3 py-2 text-center ${
+                        selectedHabits?.[habit.key]
+                          ? "bg-gold-500 text-slate-900"
+                          : "border border-white/20 text-gray-200"
+                      }`}
+                    >
+                      {habit.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <a
               href={selectedMission.url}

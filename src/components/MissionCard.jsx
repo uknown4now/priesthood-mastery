@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import HabitToggleButton from "./HabitToggleButton.jsx";
 
 export default function MissionCard({
   userName,
@@ -12,6 +13,8 @@ export default function MissionCard({
   onOpenMission,
   missionCompleted,
   onCompleteMission,
+  habits,
+  onToggleHabit,
   getReflection,
   saveReflection
 }) {
@@ -38,6 +41,13 @@ export default function MissionCard({
     }
     setResourceRead(false);
   }, [existingReflection]);
+
+  const updateHabit = useCallback(
+    (key) => {
+      onToggleHabit?.(key);
+    },
+    [onToggleHabit]
+  );
 
   return (
     <section className="mb-6 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
@@ -97,6 +107,28 @@ export default function MissionCard({
           <div className="space-y-3 text-sm text-gray-200">
             <p>{activeMission.message}</p>
             <p>{activeMission.challenge}</p>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-3">
+            <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+              Daily Habits
+            </p>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-xs font-semibold">
+              {[
+                { key: "scripture", label: "Scripture" },
+                { key: "prayer", label: "Prayer" },
+                { key: "service", label: "Service" }
+              ].map((habit) => (
+                <HabitToggleButton
+                  key={habit.key}
+                  habitKey={habit.key}
+                  label={habit.label}
+                  showIcon={false}
+                  className="px-3 py-2 text-xs font-semibold"
+                  isActive={habits?.[habit.key]}
+                  onToggle={updateHabit}
+                />
+              ))}
+            </div>
           </div>
           <button
             onClick={() => {

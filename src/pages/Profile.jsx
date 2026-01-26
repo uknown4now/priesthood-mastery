@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import HabitMomentumCircles from "../components/HabitMomentumCircles.jsx";
 
 const REMINDER_KEY = "priesthood.remindersEnabled";
 const OFFICE_OPTIONS = ["deacon", "teacher", "priest", "elder"];
@@ -12,7 +13,8 @@ export default function Profile({
   onResetProgress,
   totalDaysCompleted,
   phaseCompletions,
-  phaseStatus
+  phaseStatus,
+  habitTotals
 }) {
   const [enabled, setEnabled] = useState(() =>
     typeof window === "undefined"
@@ -42,6 +44,60 @@ export default function Profile({
       }
     }
     return count;
+  }, []);
+
+  const { reliability, repentanceRate } = useMemo(() => {
+    if (typeof window === "undefined") {
+      return { reliability: 0, repentanceRate: 0, habitCells: [] };
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const completedDates = new Set();
+    for (let i = 0; i < window.localStorage.length; i += 1) {
+      const key = window.localStorage.key(i);
+      const match = key?.match(/^day_(\d{4}-\d{2}-\d{2})_completed$/);
+      if (!match) continue;
+      try {
+        if (JSON.parse(window.localStorage.getItem(key) || "false")) {
+          completedDates.add(match[1]);
+        }
+      } catch (error) {
+        // ignore
+      }
+    }
+    const daysToCheck = 30;
+    let completedCount = 0;
+    for (let i = 0; i < daysToCheck; i += 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      if (completedDates.has(date.toISOString().slice(0, 10))) {
+        completedCount += 1;
+      }
+    }
+    const reliability = Math.round((completedCount / daysToCheck) * 100);
+
+    let lastMissed = null;
+    let totalReturn = 0;
+    let returnCount = 0;
+    for (let i = 0; i < 120; i += 1) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      const key = date.toISOString().slice(0, 10);
+      const completed = completedDates.has(key);
+      if (!completed && lastMissed === null) {
+        lastMissed = i;
+      }
+      if (completed && lastMissed !== null) {
+        totalReturn += lastMissed;
+        returnCount += 1;
+        lastMissed = null;
+      }
+    }
+    const repentanceRate = returnCount
+      ? Math.round(totalReturn / returnCount)
+      : 0;
+
+    return { reliability, repentanceRate };
   }, []);
 
   const requestPermission = async () => {
@@ -146,6 +202,28 @@ export default function Profile({
             <span>Journal Entries</span>
             <span className="font-semibold text-white">{journalEntries}</span>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-xl border border-white/10 bg-[rgba(var(--color-surface),0.8)] p-4">
+        <p className="text-xs uppercase tracking-[0.2em] text-gold-500">
+          Growth Summary
+        </p>
+        <div className="mt-3 grid gap-2 text-sm text-gray-200">
+          <div className="flex items-center justify-between">
+            <span>Reliability</span>
+            <span className="font-semibold text-white">{reliability}%</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Repentance Rate</span>
+            <span className="font-semibold text-white">
+              {repentanceRate ? `${repentanceRate} days` : "—"}
+            </span>
+          </div>
+        </div>
+        <p className="mt-3 text-xs text-gray-400">Habit Momentum</p>
+        <div className="mt-4">
+          <HabitMomentumCircles size={80} counts={habitTotals} />
         </div>
       </div>
 

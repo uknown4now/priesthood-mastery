@@ -13,16 +13,12 @@ import RecoveryModal from "./components/RecoveryModal.jsx";
 import RecoveryToast from "./components/RecoveryToast.jsx";
 import DeveloperToolbar from "./components/DeveloperToolbar.jsx";
 import { useMission } from "./context/MissionProvider.jsx";
+import useHabitRecords from "./hooks/useHabitRecords.js";
 const REMINDER_KEY = "priesthood.remindersEnabled";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState("dashboard");
   const [missionOpen, setMissionOpen] = useState(false);
-  const [habits, setHabits] = useState({
-    scripture: false,
-    prayer: false,
-    service: false
-  });
   const {
     offices,
     selectedOffice,
@@ -69,6 +65,9 @@ export default function App() {
     clearGraceDay,
     manualCompletedDays
   } = useMission();
+  const { habits, toggleHabit, totals, weeklyHabitsCount } = useHabitRecords({
+    activeDay
+  });
 
   const safeUserName = userName?.trim() || "Brother";
   const hasName = userName?.trim().length > 0;
@@ -87,50 +86,6 @@ export default function App() {
     [completedDay]
   );
 
-  const weeklyHabitsCount = useMemo(() => {
-    if (typeof window === "undefined") return 0;
-    const raw = window.localStorage.getItem("priesthood.habitLog");
-    if (!raw) return 0;
-    let habitLog = {};
-    try {
-      habitLog = JSON.parse(raw);
-    } catch (error) {
-      return 0;
-    }
-    const today = new Date();
-    const start = new Date(today);
-    start.setDate(today.getDate() - today.getDay());
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-    end.setHours(23, 59, 59, 999);
-    return Object.entries(habitLog).reduce((count, [dateKey, entry]) => {
-      const date = new Date(dateKey);
-      if (date >= start && date <= end && entry?.completed) {
-        return count + 1;
-      }
-      return count;
-    }, 0);
-  }, [habits]);
-
-  const toggleHabit = (key) => {
-    setHabits((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const todayKey = new Date().toISOString().slice(0, 10);
-    const completed = Object.values(habits).every(Boolean);
-    const raw = window.localStorage.getItem("priesthood.habitLog");
-    let habitLog = {};
-    try {
-      habitLog = raw ? JSON.parse(raw) : {};
-    } catch (error) {
-      habitLog = {};
-    }
-    habitLog[todayKey] = { completed, habits };
-    window.localStorage.setItem("priesthood.habitLog", JSON.stringify(habitLog));
-  }, [habits]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -264,8 +219,10 @@ export default function App() {
             badges={badges}
             manualCompletedDays={manualCompletedDays}
             phaseStatus={phaseStatus}
+            graceDays={graceDays}
             habits={habits}
             onToggleHabit={toggleHabit}
+            habitTotals={totals}
             weeklyHabitsCount={weeklyHabitsCount}
             progressDay={completedDay}
             progressPercent={progressPercent}
@@ -308,6 +265,7 @@ export default function App() {
             totalDaysCompleted={completedDay}
             phaseCompletions={phaseCompletions}
             phaseStatus={phaseStatus}
+            habitTotals={totals}
           />
         )}
       </div>
