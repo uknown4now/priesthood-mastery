@@ -2,121 +2,66 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
 const reflectionLibrary = {
-  phase1: [
-    {
-      id: "q1",
-      prompt: "Where did you feel the Spirit confirm your foundation this week?"
-    },
-    {
-      id: "q2",
-      prompt: "Which daily mission challenged you most, and why?",
-      showWeeklyNotes: true
-    },
-    {
-      id: "q3",
-      prompt: "What habit felt hardest to keep consistent this week?"
-    },
-    {
-      id: "q4",
-      prompt: "Who needed a priesthood touch or encouragement this week?"
-    },
-    {
-      id: "q5",
-      prompt: "What is your focused priesthood goal for the coming week?"
-    }
-  ],
-  phase2: [
-    {
-      id: "q1",
-      prompt: "Which doctrine or principle became clearer for you this week?"
-    },
-    {
-      id: "q2",
-      prompt: "How did your habit rhythm affect your confidence and discipline?"
-    },
-    {
-      id: "q3",
-      prompt: "Which mission had the greatest impact, and why?",
-      showWeeklyNotes: true
-    },
-    {
-      id: "q4",
-      prompt: "Where did you notice a need you could quietly meet?"
-    },
-    {
-      id: "q5",
-      prompt: "What discipline will you guard most carefully next week?"
-    }
-  ],
-  phase3: [
-    {
-      id: "q1",
-      prompt: "Which ordinance or handbook insight stood out this week?"
-    },
-    {
-      id: "q2",
-      prompt: "How did preparation shape your service this week?"
-    },
-    {
-      id: "q3",
-      prompt: "Which assignment stretched your leadership?",
-      showWeeklyNotes: true
-    },
-    {
-      id: "q4",
-      prompt: "Who could benefit from follow-up or a blessing this week?"
-    },
-    {
-      id: "q5",
-      prompt: "What skill will you refine over the next seven days?"
-    }
-  ],
-  phase4: [
-    {
-      id: "q1",
-      prompt: "Where did your stewardship bless someone in a lasting way?"
-    },
-    {
-      id: "q2",
-      prompt: "Which practice strengthened your resilience this week?"
-    },
-    {
-      id: "q3",
-      prompt: "What mission moment felt most sacred to you?",
-      showWeeklyNotes: true
-    },
-    {
-      id: "q4",
-      prompt: "Who should you mentor or strengthen next?"
-    },
-    {
-      id: "q5",
-      prompt: "What is your consecrated goal for the week ahead?"
-    }
-  ],
-  phase5: [
-    {
-      id: "q1",
-      prompt: "How has your service legacy grown this week?"
-    },
-    {
-      id: "q2",
-      prompt: "What pattern of devotion will you keep for the long run?"
-    },
-    {
-      id: "q3",
-      prompt: "Which mission story will you remember most?",
-      showWeeklyNotes: true
-    },
-    {
-      id: "q4",
-      prompt: "Who can you empower to lead next?"
-    },
-    {
-      id: "q5",
-      prompt: "What promise will you carry into the next season?"
-    }
-  ]
+"weekly_reflections": {
+    "phase1": [
+      { "id": "q1", "prompt": "Did I complete my daily missions with real intent this week?" },
+      { "id": "q2", "prompt": "What was the biggest obstacle to my consistency, and how will I overcome it?" },
+      { "id": "q3", "prompt": "Which scripture or quote spoke most clearly to my current needs?" },
+      { "id": "q4", "prompt": "How has my awareness of my Priesthood office changed this week?" },
+      { "id": "q5", "prompt": "What is one 'small and simple' thing I will focus on next week?" }
+    ],
+    "phase2": [
+      { "id": "q1", "prompt": "How has my understanding of Priesthood Keys or Authority deepened this week?" },
+      { "id": "q2", "prompt": "Did I seek personal revelation during study, or was I just 'reading to finish'?" },
+      { "id": "q3", "prompt": "What 'breach' in my spiritual life am I currently working with the Lord to repair?" },
+      { "id": "q4", "prompt": "How did I see the Lord's hand in my life during my moments of study?" },
+      { "id": "q5", "prompt": "How can I more worthily prepare to partake of the Sacrament this Sunday?" }
+    ],
+    "phase3": [
+      { "id": "q1", "prompt": "If called upon today to give a blessing, would I feel 'spiritually prepared'?" },
+      { "id": "q2", "prompt": "How did I exercise Priesthood authority in my home or circle of influence?" },
+      { "id": "q3", "prompt": "What specific attribute of Christ did I notice that I want to emulate?" },
+      { "id": "q4", "prompt": "In what ways did I 'sanctify' myself to be a better instrument for the Lord?" },
+      { "id": "q5", "prompt": "What prompted me most strongly to change my behavior this week?" }
+    ],
+    "phase4": [
+      { "id": "q1", "prompt": "Who did the Spirit prompt me to serve this week, and did I act on it?" },
+      { "id": "q2", "prompt": "How has my 'Priesthood Momentum' changed my perspective on daily trials?" },
+      { "id": "q3", "prompt": "What is the most significant 'mighty change of heart' I have felt lately?" },
+      { "id": "q4", "prompt": "Am I currently magnifying my calling, or merely performing the duties of it?" },
+      { "id": "q5", "prompt": "If the Lord gave me a 'Stewardship Interview' today, what would be my report?" }
+    ]
+  },
+  "milestone_reflections": {
+    "day30": [
+      { "id": "m1", "prompt": "Look back at Day 1. What is the most visible change in your spiritual discipline?" },
+      { "id": "m2", "prompt": "How has your relationship with the Savior shifted during this first month?" },
+      { "id": "m3", "prompt": "Which 'Foundation' principle do you feel is currently your strongest?" },
+      { "id": "m4", "prompt": "What distraction are you now ready to leave behind to move deeper into the path?" },
+      { "id": "m5", "prompt": "Write a 'Letter to Self' for the next 30 days: What is your primary goal?" }
+    ],
+    "day60": [
+      { "id": "m1", "prompt": "You are halfway. How has your capacity to 'Hear Him' increased?" },
+      { "id": "m2", "prompt": "Describe a moment this month where you felt the power of the Priesthood move through you." },
+      { "id": "m3", "prompt": "In which ordinance or duty do you feel you need more 'Specialization' or study?" },
+      { "id": "m4", "prompt": "How has your family or Quorum benefited from your commitment to this path?" },
+      { "id": "m5", "prompt": "What is the 'hardest' thing the Lord has asked you to change so far?" }
+    ],
+    "day90": [
+      { "id": "m1", "prompt": "The focus is now on others. Who are the 'sheep' in your specific stewardship?" },
+      { "id": "m2", "prompt": "How has your focus shifted from 'personal growth' to 'priesthood service'?" },
+      { "id": "m3", "prompt": "What does 'The Oath and Covenant of the Priesthood' mean to you personally now?" },
+      { "id": "m4", "prompt": "Where do you still feel a 'lack' in your spiritual armor?" },
+      { "id": "m5", "prompt": "What is your plan to ensure this momentum continues after Day 120?" }
+    ],
+    "day120": [
+      { "id": "m1", "prompt": "You have finished the path. Who are you today compared to Day 1?" },
+      { "id": "m2", "prompt": "What was the most difficult 'Gate' or 'Phase Fork' you encountered?" },
+      { "id": "m3", "prompt": "Describe your current 'Priesthood Identity' in three words." },
+      { "id": "m4", "prompt": "What is your commitment to the Lord regarding your service for the rest of the year?" },
+      { "id": "m5", "prompt": "Final Reflection: What is the most important lesson you learned about God's power?" }
+    ]
+  }
 };
 
 const PHASE_METADATA = {
