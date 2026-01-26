@@ -4,7 +4,8 @@ const FILTERS = ["All", "Daily Missions", "Sunday Reports"];
 
 const promptByType = {
   daily: "Record how this assignment shaped your confidence and spiritual focus today.",
-  sunday: "Weekly Account of Stewardship"
+  sunday: "Weekly Account of Stewardship",
+  weeklySummary: "Weekly Summary"
 };
 
 const parseEntriesFromStorage = () => {
@@ -33,6 +34,17 @@ const parseEntriesFromStorage = () => {
         if (Array.isArray(parsed)) {
           parsed.forEach((entry) => entries.push(entry));
         } else if (parsed) {
+          entries.push(parsed);
+        }
+      } catch (error) {
+        // ignore malformed
+      }
+    }
+    if (key.startsWith("weekly_summary_")) {
+      const raw = window.localStorage.getItem(key);
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed) {
           entries.push(parsed);
         }
       } catch (error) {
@@ -88,14 +100,22 @@ export default function Journal() {
         if (activeFilter === "Daily Missions" && entry.type !== "daily") {
           return false;
         }
-        if (activeFilter === "Sunday Reports" && entry.type !== "sunday") {
+        if (
+          activeFilter === "Sunday Reports" &&
+          entry.type !== "sunday" &&
+          entry.type !== "weeklySummary"
+        ) {
           return false;
         }
         return true;
       })
       .filter((entry) => {
         const prompt = entry.prompt || promptByType[entry.type] || "";
-        const response = entry.response || "";
+        const response =
+          entry.response ||
+          (Array.isArray(entry.responses)
+            ? entry.responses.map((item) => item.response).join(" ")
+            : "");
         return (
           prompt.toLowerCase().includes(term) ||
           response.toLowerCase().includes(term) ||
@@ -201,7 +221,8 @@ export default function Journal() {
         <div className="grid gap-4 pb-8">
           {filteredEntries.map((entry, index) => {
             const prompt = entry.prompt || promptByType[entry.type] || "Prompt";
-            const isSunday = entry.type === "sunday";
+            const isWeeklySummary = entry.type === "weeklySummary";
+            const isSunday = entry.type === "sunday" || isWeeklySummary;
             return (
               <div
                 key={`${entry.date}-${index}`}
@@ -215,8 +236,43 @@ export default function Journal() {
                   <span>{formatDate(entry.date)}</span>
                   <span>{entry.office || "Unknown Office"}</span>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-white">{prompt}</p>
-                <p className="mt-2 text-sm text-gray-200">{entry.response}</p>
+                {isWeeklySummary ? (
+                  <>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+                      <span className="uppercase tracking-[0.2em] text-gold-500">
+                        Weekly Summary
+                      </span>
+                      {entry.phaseLabel ? <span>{entry.phaseLabel}</span> : null}
+                      {entry.weekStartDay && entry.weekEndDay ? (
+                        <span>
+                          Days {entry.weekStartDay}-{entry.weekEndDay}
+                        </span>
+                      ) : null}
+                    </div>
+                    {typeof entry.momentumAverage === "number" && (
+                      <p className="mt-2 text-xs text-gold-400">
+                        Avg Momentum: {entry.momentumAverage}/100
+                      </p>
+                    )}
+                    <div className="mt-3 space-y-3">
+                      {(entry.responses || []).map((item, responseIndex) => (
+                        <div key={`${entry.id}-${responseIndex}`}>
+                          <p className="text-sm font-semibold text-white">
+                            {item.prompt}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-200">
+                            {item.response}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="mt-3 text-sm font-semibold text-white">{prompt}</p>
+                    <p className="mt-2 text-sm text-gray-200">{entry.response}</p>
+                  </>
+                )}
               </div>
             );
           })}

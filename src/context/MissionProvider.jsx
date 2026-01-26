@@ -747,57 +747,89 @@ export function MissionProvider({ children }) {
     return reflectionsByOffice[selectedOffice]?.[day] || "";
   };
 
-  const completeWeeklyReflection = (responses) => {
+  const completeWeeklyReflection = ({ responses, questions, summary } = {}) => {
     if (!selectedOffice) return;
+    const safeResponses = responses || {};
+    const questionList = Array.isArray(questions) ? questions : [];
+    const responseItems =
+      questionList.length > 0
+        ? questionList.map((question, index) => ({
+            prompt: question.prompt || `Question ${index + 1}`,
+            response: (safeResponses[question.id] || "").trim()
+          }))
+        : Object.entries(safeResponses).map(([prompt, response]) => ({
+            prompt,
+            response: (response || "").trim()
+          }));
+    const weekStartDay = summary?.weekStartDay || null;
+    const weekEndDay = summary?.weekEndDay || null;
     const entry = {
       id: crypto.randomUUID ? crypto.randomUUID() : `weekly-${Date.now()}`,
       date: new Date().toISOString(),
       office: selectedOffice,
-      responses
+      type: "weeklySummary",
+      phaseId: summary?.phaseId || null,
+      phaseLabel: summary?.phaseLabel || null,
+      phaseIcon: summary?.phaseIcon || null,
+      weekStartDay,
+      weekEndDay,
+      momentumAverage:
+        typeof summary?.momentumAverage === "number"
+          ? summary.momentumAverage
+          : null,
+      responses: responseItems
     };
     appendJournalHistory(entry);
-    const sundayEntries = Object.entries(responses || {}).map(([prompt, response]) => ({
+    const sundayEntries = responseItems.map((item) => ({
       type: "sunday",
-      date: new Date().toISOString(),
+      date: entry.date,
       office: selectedOffice,
-      prompt,
-      response
+      prompt: item.prompt,
+      response: item.response
     }));
     window.localStorage.setItem(
       `sunday_report_${Date.now()}`,
       JSON.stringify(sundayEntries)
     );
-    recordManualCompletion(7);
-    recordCompletion(7);
-    const phaseInfo = resolvePhaseCompletion(7);
-    if (phaseInfo && !phaseCompletions[phaseInfo.key]) {
-      const range = phaseRangeForEndDay(7);
-      const metrics = getPhaseMetrics(range);
-      if (metrics.excusedDays.length > 0 && metrics.manualCount < metrics.total) {
-        setPhaseReview({
-          phase: phaseInfo,
-          range,
-          ...metrics
-        });
+    const summaryKey = weekStartDay
+      ? `weekly_summary_${selectedOffice}_${weekStartDay}`
+      : `weekly_summary_${selectedOffice}_${Date.now()}`;
+    window.localStorage.setItem(summaryKey, JSON.stringify(entry));
+
+    const starterWeekEnd = weekEndDay || 7;
+    if (starterWeekEnd === 7 && !starterState.isStarterFinished) {
+      recordManualCompletion(7);
+      recordCompletion(7);
+      const phaseInfo = resolvePhaseCompletion(7);
+      if (phaseInfo && !phaseCompletions[phaseInfo.key]) {
+        const range = phaseRangeForEndDay(7);
+        const metrics = getPhaseMetrics(range);
+        if (metrics.excusedDays.length > 0 && metrics.manualCount < metrics.total) {
+          setPhaseReview({
+            phase: phaseInfo,
+            range,
+            ...metrics
+          });
+          setPendingPhaseAdvance({ type: "starter" });
+          return;
+        }
+        setPhaseCompletion(phaseInfo);
         setPendingPhaseAdvance({ type: "starter" });
         return;
       }
-      setPhaseCompletion(phaseInfo);
-      setPendingPhaseAdvance({ type: "starter" });
-      return;
+      setStarterState({
+        isStarterFinished: true,
+        currentMonth: 1,
+        currentDay: 1
+      });
+      setProgressByOffice((prev) => ({
+        ...prev,
+        [selectedOffice]: {
+          completedDay: 0,
+          completedDate: null
+        }
+      }));
     }
-    setStarterState({
-      isStarterFinished: true,
-      currentMonth: 1,
-      currentDay: 1
-    });
-    setProgressByOffice((prev) => ({
-      ...prev,
-      [selectedOffice]: {
-        completedDay: 0,
-        completedDate: null
-      }
-    }));
   };
 
   const continuePhaseCompletion = () => {

@@ -56,6 +56,37 @@ export default function Dashboard({
           }))
           .filter((entry) => entry.reflection)
       : [];
+  const weekEndDay = activeDay || 0;
+  const weekStartDay = weekEndDay ? Math.max(1, weekEndDay - 6) : 0;
+  const weekLabel =
+    weekStartDay && weekEndDay ? `Days ${weekStartDay}-${weekEndDay}` : "";
+
+  const getPhaseForDay = (day) => {
+    if (day <= 7) {
+      return { id: "phase1", label: "Foundation", icon: "/assets/ShieldOfFaith.png" };
+    }
+    if (day <= 35) {
+      return { id: "phase2", label: "Daily Engine", icon: "/assets/TheOpenWord.png" };
+    }
+    if (day <= 63) {
+      return { id: "phase3", label: "Reference", icon: "/assets/KeyOfAuthority.png" };
+    }
+    if (day <= 91) {
+      return { id: "phase4", label: "Mastery", icon: "/assets/SheppardsStaff.png" };
+    }
+    return { id: "phase5", label: "Legacy", icon: "/assets/CrownOfLife.png" };
+  };
+
+  const reflectionPhase = useMemo(
+    () => getPhaseForDay(weekEndDay || 1),
+    [weekEndDay]
+  );
+  const isWeeklyReflectionDay = weekEndDay > 0 && weekEndDay % 7 === 0;
+  const weeklySummaryKey =
+    selectedOffice && weekStartDay
+      ? `weekly_summary_${selectedOffice}_${weekStartDay}`
+      : null;
+  const [hasWeeklySummary, setHasWeeklySummary] = useState(false);
 
   const totalEntries = useMemo(() => {
     if (typeof window === "undefined") return 0;
@@ -110,6 +141,15 @@ export default function Dashboard({
     }
   }, [catchUpDay]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isWeeklyReflectionDay || !weeklySummaryKey) {
+      setHasWeeklySummary(false);
+      return;
+    }
+    setHasWeeklySummary(Boolean(window.localStorage.getItem(weeklySummaryKey)));
+  }, [isWeeklyReflectionDay, weeklySummaryKey, showWeeklyWizard]);
+
   const catchUpMission = useMemo(() => {
     if (!catchUpDay) return null;
     return (allDays || []).find((day) => day.id === catchUpDay) || null;
@@ -153,6 +193,48 @@ export default function Dashboard({
     return Math.max(0, Math.min(100, score));
   }, [activeDay, graceDays, manualCompletedDays]);
 
+  const calculateMomentumForDay = (day, completedDays, excusedDays) => {
+    const completedSet = new Set(
+      completedDays.filter((value) => value <= day)
+    );
+    const excusedSet = new Set(excusedDays.filter((value) => value <= day));
+    let catchUpCompleted = 0;
+    completedSet.forEach((value) => {
+      if (excusedSet.has(value)) catchUpCompleted += 1;
+    });
+    const normalCompleted = completedSet.size - catchUpCompleted;
+    let missedDays = 0;
+    for (let cursor = 1; cursor < day; cursor += 1) {
+      if (completedSet.has(cursor)) continue;
+      if (excusedSet.has(cursor)) continue;
+      missedDays += 1;
+    }
+    const score =
+      normalCompleted * 5 + catchUpCompleted * 3 + missedDays * -10;
+    return Math.max(0, Math.min(100, score));
+  };
+
+  const weeklyMomentumAverage = useMemo(() => {
+    if (!isWeeklyReflectionDay) return null;
+    const completedDays = manualCompletedDays || [];
+    const excusedMap = graceDays || {};
+    const excusedDays = Object.keys(excusedMap).map((day) => Number(day));
+    if (!weekStartDay || !weekEndDay) return null;
+    const scores = [];
+    for (let day = weekStartDay; day <= weekEndDay; day += 1) {
+      scores.push(calculateMomentumForDay(day, completedDays, excusedDays));
+    }
+    if (!scores.length) return null;
+    const average = scores.reduce((sum, value) => sum + value, 0) / scores.length;
+    return Math.round(average);
+  }, [
+    graceDays,
+    isWeeklyReflectionDay,
+    manualCompletedDays,
+    weekEndDay,
+    weekStartDay
+  ]);
+
   const catchUpSaved = catchUpDay
     ? getReflection?.(catchUpDay) || ""
     : "";
@@ -162,6 +244,11 @@ export default function Dashboard({
   };
 
   const displayName = userName?.trim() ? userName : "Brother";
+  const shouldShowWeeklyReflection = isWeeklyReflectionDay && !hasWeeklySummary;
+  const shouldShowStarterGate =
+    shouldShowWeeklyReflection && !isStarterFinished && weekEndDay === 7;
+  const shouldShowWeeklyCard =
+    shouldShowWeeklyReflection && isStarterFinished && weekEndDay !== 7;
 
   return (
     <>
@@ -444,7 +531,7 @@ export default function Dashboard({
             Save Final Reflection
           </button>
         </section>
-      ) : activeDay === 7 && !isStarterFinished ? (
+      ) : shouldShowStarterGate ? (
         <section className="mb-6 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
           <p className="text-xs uppercase tracking-[0.25em] text-gold-500">
             Weekly Account of Stewardship
@@ -464,9 +551,23 @@ export default function Dashboard({
           {showWeeklyWizard && (
             <WeeklyReflectionWizard
               weeklyReflections={weekReflections}
+              phaseId={reflectionPhase.id}
+              weekLabel={weekLabel}
               onClose={() => setShowWeeklyWizard(false)}
-              onComplete={(responses) => {
-                onCompleteWeeklyReflection(responses);
+              onComplete={({ responses, questions }) => {
+                onCompleteWeeklyReflection({
+                  responses,
+                  questions,
+                  summary: {
+                    weekStartDay,
+                    weekEndDay,
+                    phaseId: reflectionPhase.id,
+                    phaseLabel: reflectionPhase.label,
+                    phaseIcon: reflectionPhase.icon,
+                    momentumAverage: weeklyMomentumAverage
+                  }
+                });
+                setHasWeeklySummary(true);
                 setShowWeeklyWizard(false);
                 setShowCelebration(true);
               }}
@@ -474,21 +575,75 @@ export default function Dashboard({
           )}
         </section>
       ) : (
-        <MissionCard
-          offices={offices}
-          selectedOffice={selectedOffice}
-          onSelectOffice={onSelectOffice}
-          activeMission={activeMission}
-          activeDay={activeDay}
-          missionOpen={missionOpen}
-          onOpenMission={onOpenMission}
-          missionCompleted={missionCompleted}
-          onCompleteMission={onCompleteMission}
-          habits={habits}
-          onToggleHabit={onToggleHabit}
-          getReflection={getReflection}
-          saveReflection={saveReflection}
-        />
+        <>
+          {shouldShowWeeklyCard && (
+            <section className="mb-6 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <img
+                  src={reflectionPhase.icon}
+                  alt={`${reflectionPhase.label} icon`}
+                  className="h-10 w-10"
+                />
+                <div>
+                  <p className="text-xs uppercase tracking-[0.25em] text-gold-500">
+                    Weekly Account of Stewardship
+                  </p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">
+                    {reflectionPhase.label} Reflection
+                  </h2>
+                </div>
+              </div>
+              <p className="mt-3 text-sm text-gray-300">
+                Set aside a sacred space to review the last seven days.
+              </p>
+              <button
+                onClick={() => setShowWeeklyWizard(true)}
+                className="mt-4 w-full rounded-xl bg-gold-500 px-4 py-3 text-sm font-semibold text-slate-900 shadow-md shadow-gold-500/30 transition hover:bg-gold-400"
+              >
+                Start Weekly Reflection
+              </button>
+              {showWeeklyWizard && (
+                <WeeklyReflectionWizard
+                  weeklyReflections={weekReflections}
+                  phaseId={reflectionPhase.id}
+                  weekLabel={weekLabel}
+                  onClose={() => setShowWeeklyWizard(false)}
+                  onComplete={({ responses, questions }) => {
+                    onCompleteWeeklyReflection({
+                      responses,
+                      questions,
+                      summary: {
+                        weekStartDay,
+                        weekEndDay,
+                        phaseId: reflectionPhase.id,
+                        phaseLabel: reflectionPhase.label,
+                        phaseIcon: reflectionPhase.icon,
+                        momentumAverage: weeklyMomentumAverage
+                      }
+                    });
+                    setHasWeeklySummary(true);
+                    setShowWeeklyWizard(false);
+                  }}
+                />
+              )}
+            </section>
+          )}
+          <MissionCard
+            offices={offices}
+            selectedOffice={selectedOffice}
+            onSelectOffice={onSelectOffice}
+            activeMission={activeMission}
+            activeDay={activeDay}
+            missionOpen={missionOpen}
+            onOpenMission={onOpenMission}
+            missionCompleted={missionCompleted}
+            onCompleteMission={onCompleteMission}
+            habits={habits}
+            onToggleHabit={onToggleHabit}
+            getReflection={getReflection}
+            saveReflection={saveReflection}
+          />
+        </>
       )}
 
       {!masteryComplete && !(activeDay === 7 && !isStarterFinished) && (
