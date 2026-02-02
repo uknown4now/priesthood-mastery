@@ -19,9 +19,14 @@ export default function MissionCard({
   saveReflection
 }) {
   const officeEntries = Object.entries(offices);
-  const officeLabel = selectedOffice
-    ? selectedOffice.charAt(0).toUpperCase() + selectedOffice.slice(1)
-    : "New";
+  const formatOfficeLabel = (value) =>
+    value
+      ? value
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ")
+      : "New";
+  const officeLabel = formatOfficeLabel(selectedOffice);
   const currentDay = activeDay || 1;
   const [showReflection, setShowReflection] = useState(false);
   const [reflectionText, setReflectionText] = useState("");
@@ -77,7 +82,7 @@ export default function MissionCard({
               onClick={() => onSelectOffice(key)}
               className="rounded-xl border border-white/10 bg-[rgba(var(--color-surface),0.8)] px-3 py-3 text-sm font-semibold text-gray-100 transition hover:border-gold-500/60 hover:bg-gold-500/10"
             >
-              {key.charAt(0).toUpperCase() + key.slice(1)}
+              {formatOfficeLabel(key)}
             </button>
           ))}
         </div>

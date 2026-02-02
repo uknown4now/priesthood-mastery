@@ -13,6 +13,13 @@ export default function DeveloperToolbar({
   const [open, setOpen] = useState(false);
   const [officeInput, setOfficeInput] = useState(selectedOffice || "");
   const [lastActiveInput, setLastActiveInput] = useState("");
+  const formatOfficeLabel = (value) =>
+    value
+      ? value
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ")
+      : "";
 
   useEffect(() => {
     setNameInput(userName || "");
@@ -73,9 +80,10 @@ export default function DeveloperToolbar({
               <option value="" disabled>
                 Select office
               </option>
-              {["deacon", "teacher", "priest", "elder"].map((office) => (
+              {["deacon", "teacher", "priest", "elder", "high_Priest"].map(
+                (office) => (
                 <option key={office} value={office}>
-                  {office.charAt(0).toUpperCase() + office.slice(1)}
+                  {formatOfficeLabel(office)}
                 </option>
               ))}
             </select>

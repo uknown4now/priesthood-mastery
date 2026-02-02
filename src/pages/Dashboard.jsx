@@ -56,10 +56,12 @@ export default function Dashboard({
           }))
           .filter((entry) => entry.reflection)
       : [];
+  const milestoneDays = [35, 63, 91, 119, 120];
   const weekEndDay = activeDay || 0;
   const weekStartDay = weekEndDay ? Math.max(1, weekEndDay - 6) : 0;
   const weekLabel =
     weekStartDay && weekEndDay ? `Days ${weekStartDay}-${weekEndDay}` : "";
+  const isMilestoneDay = milestoneDays.includes(weekEndDay);
 
   const getPhaseForDay = (day) => {
     if (day <= 7) {
@@ -82,6 +84,7 @@ export default function Dashboard({
     [weekEndDay]
   );
   const isWeeklyReflectionDay = weekEndDay > 0 && weekEndDay % 7 === 0;
+  const isReflectionDay = isMilestoneDay || isWeeklyReflectionDay;
   const weeklySummaryKey =
     selectedOffice && weekStartDay
       ? `weekly_summary_${selectedOffice}_${weekStartDay}`
@@ -143,12 +146,12 @@ export default function Dashboard({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!isWeeklyReflectionDay || !weeklySummaryKey) {
+    if (!isReflectionDay || !weeklySummaryKey) {
       setHasWeeklySummary(false);
       return;
     }
     setHasWeeklySummary(Boolean(window.localStorage.getItem(weeklySummaryKey)));
-  }, [isWeeklyReflectionDay, weeklySummaryKey, showWeeklyWizard]);
+  }, [isReflectionDay, weeklySummaryKey, showWeeklyWizard]);
 
   const catchUpMission = useMemo(() => {
     if (!catchUpDay) return null;
@@ -215,7 +218,7 @@ export default function Dashboard({
   };
 
   const weeklyMomentumAverage = useMemo(() => {
-    if (!isWeeklyReflectionDay) return null;
+    if (!isReflectionDay) return null;
     const completedDays = manualCompletedDays || [];
     const excusedMap = graceDays || {};
     const excusedDays = Object.keys(excusedMap).map((day) => Number(day));
@@ -229,7 +232,7 @@ export default function Dashboard({
     return Math.round(average);
   }, [
     graceDays,
-    isWeeklyReflectionDay,
+    isReflectionDay,
     manualCompletedDays,
     weekEndDay,
     weekStartDay
@@ -244,11 +247,17 @@ export default function Dashboard({
   };
 
   const displayName = userName?.trim() ? userName : "Brother";
-  const shouldShowWeeklyReflection = isWeeklyReflectionDay && !hasWeeklySummary;
-  const shouldShowStarterGate =
-    shouldShowWeeklyReflection && !isStarterFinished && weekEndDay === 7;
+  const formatOfficeLabel = (value) =>
+    value
+      ? value
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ")
+      : "";
+  const shouldShowWeeklyReflection = isReflectionDay;
+  const isStarterGateDay = weekEndDay === 7 && !isStarterFinished;
   const shouldShowWeeklyCard =
-    shouldShowWeeklyReflection && isStarterFinished && weekEndDay !== 7;
+    shouldShowWeeklyReflection && (isStarterGateDay || (isStarterFinished && weekEndDay !== 7));
 
   return (
     <>
@@ -457,13 +466,14 @@ export default function Dashboard({
               className="w-full rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-gray-100 placeholder:text-gray-500 focus:border-gold-500/60 focus:outline-none"
             />
             <div className="grid grid-cols-2 gap-3">
-              {["deacon", "teacher", "priest", "elder"].map((office) => (
+              {["deacon", "teacher", "priest", "elder", "high_Priest"].map(
+                (office) => (
                 <button
                   key={office}
                   onClick={() => onSelectOffice(office)}
                   className="rounded-xl border border-white/10 bg-[rgba(var(--color-surface),0.8)] px-3 py-3 text-sm font-semibold text-gray-100 transition hover:border-gold-500/60 hover:bg-gold-500/10"
                 >
-                  {office.charAt(0).toUpperCase() + office.slice(1)}
+                  {formatOfficeLabel(office)}
                 </button>
               ))}
             </div>
@@ -531,53 +541,14 @@ export default function Dashboard({
             Save Final Reflection
           </button>
         </section>
-      ) : shouldShowStarterGate ? (
-        <section className="mb-6 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <p className="text-xs uppercase tracking-[0.25em] text-gold-500">
-            Weekly Account of Stewardship
-          </p>
-          <h2 className="mt-2 text-lg font-semibold text-white">
-            Sunday Gate
-          </h2>
-          <p className="mt-2 text-sm text-gray-300">
-            Complete your weekly reflection to unlock the Mastery Path.
-          </p>
-          <button
-            onClick={() => setShowWeeklyWizard(true)}
-            className="mt-4 w-full rounded-xl bg-gold-500 px-4 py-3 text-sm font-semibold text-slate-900 shadow-md shadow-gold-500/30 transition hover:bg-gold-400"
-          >
-            Start Weekly Reflection
-          </button>
-          {showWeeklyWizard && (
-            <WeeklyReflectionWizard
-              weeklyReflections={weekReflections}
-              phaseId={reflectionPhase.id}
-              weekLabel={weekLabel}
-              onClose={() => setShowWeeklyWizard(false)}
-              onComplete={({ responses, questions }) => {
-                onCompleteWeeklyReflection({
-                  responses,
-                  questions,
-                  summary: {
-                    weekStartDay,
-                    weekEndDay,
-                    phaseId: reflectionPhase.id,
-                    phaseLabel: reflectionPhase.label,
-                    phaseIcon: reflectionPhase.icon,
-                    momentumAverage: weeklyMomentumAverage
-                  }
-                });
-                setHasWeeklySummary(true);
-                setShowWeeklyWizard(false);
-                setShowCelebration(true);
-              }}
-            />
-          )}
-        </section>
       ) : (
         <>
           {shouldShowWeeklyCard && (
-            <section className="mb-6 rounded-2xl border border-white/20 bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+            <section
+              className={`mb-6 rounded-2xl border bg-[rgba(var(--color-surface),0.8)] p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-xl ${
+                isMilestoneDay ? "border-gold-500/80" : "border-white/20"
+              }`}
+            >
               <div className="flex items-center gap-3">
                 <img
                   src={reflectionPhase.icon}
@@ -586,15 +557,25 @@ export default function Dashboard({
                 />
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-gold-500">
-                    Weekly Account of Stewardship
+                    {isMilestoneDay
+                      ? "Milestone Reflection"
+                      : "Weekly Account of Stewardship"}
                   </p>
                   <h2 className="mt-1 text-lg font-semibold text-white">
-                    {reflectionPhase.label} Reflection
+                    {isMilestoneDay
+                      ? `Day ${weekEndDay} Reflection`
+                      : isStarterGateDay
+                        ? "Sunday Gate"
+                        : `${reflectionPhase.label} Reflection`}
                   </h2>
                 </div>
               </div>
               <p className="mt-3 text-sm text-gray-300">
-                Set aside a sacred space to review the last seven days.
+                {isMilestoneDay
+                  ? "A sacred milestone marks your progress. Record the change it brought."
+                  : isStarterGateDay
+                    ? "Complete your weekly reflection to unlock the Mastery Path."
+                    : "Set aside a sacred space to review the last seven days."}
               </p>
               <button
                 onClick={() => setShowWeeklyWizard(true)}
@@ -606,6 +587,7 @@ export default function Dashboard({
                 <WeeklyReflectionWizard
                   weeklyReflections={weekReflections}
                   phaseId={reflectionPhase.id}
+                  dayNumber={weekEndDay}
                   weekLabel={weekLabel}
                   onClose={() => setShowWeeklyWizard(false)}
                   onComplete={({ responses, questions }) => {
@@ -623,6 +605,9 @@ export default function Dashboard({
                     });
                     setHasWeeklySummary(true);
                     setShowWeeklyWizard(false);
+                    if (isStarterGateDay) {
+                      setShowCelebration(true);
+                    }
                   }}
                 />
               )}

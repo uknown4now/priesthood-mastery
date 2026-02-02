@@ -41,7 +41,8 @@ const PRIESTHOOD_ORDER_BY_OFFICE = {
   deacon: "Aaronic",
   teacher: "Aaronic",
   priest: "Aaronic",
-  elder: "Melchizedek"
+  elder: "Melchizedek",
+  high_Priest: "Melchizedek"
 };
 
 const getTodayKey = () => new Date().toISOString().slice(0, 10);
@@ -131,7 +132,17 @@ export function MissionProvider({ children }) {
     loadFromStorage(MANUAL_COMPLETION_DATES_KEY, [])
   );
 
-  const offices = curriculum.starter_pack;
+  const commonStarter = curriculum.starter_pack?.common_core || [];
+  const offices = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(PRIESTHOOD_ORDER_BY_OFFICE).map((key) => [
+          key,
+          commonStarter
+        ])
+      ),
+    [commonStarter]
+  );
 
   useEffect(() => {
     if (!selectedOffice) return;
@@ -348,7 +359,7 @@ export function MissionProvider({ children }) {
 
   const allDays = useMemo(() => {
     if (!selectedOffice) return [];
-    const starter = (curriculum.starter_pack?.[selectedOffice] || []).map(
+    const starter = commonStarter.map(
       (item) => ({
         id: item.day,
         scripture: item.scripture || "",
@@ -366,10 +377,7 @@ export function MissionProvider({ children }) {
       challenge: item.challenge || "",
       url: item.url || ""
     }));
-    const month2Track =
-      priesthoodOrder === "Aaronic"
-        ? curriculum.month_2?.gatekeeper || []
-        : curriculum.month_2?.healer || [];
+    const month2Track = curriculum.month_2?.[selectedOffice] || [];
     const month2 = month2Track.map((item) => ({
       id: item.day,
       scripture: item.scripture || "",
@@ -378,10 +386,7 @@ export function MissionProvider({ children }) {
       challenge: item.challenge || "",
       url: item.url || ""
     }));
-    const month3Track =
-      priesthoodOrder === "Aaronic"
-        ? curriculum.month_3?.aaronic || []
-        : curriculum.month_3?.melchizedek || [];
+    const month3Track = curriculum.month_3?.[selectedOffice] || [];
     const month3 = month3Track.map((item) => ({
       id: item.day,
       scripture: item.scripture || "",
@@ -390,10 +395,7 @@ export function MissionProvider({ children }) {
       challenge: item.challenge || "",
       url: item.url || ""
     }));
-    const month4Track =
-      priesthoodOrder === "Aaronic"
-        ? curriculum.month_4?.aaronic || []
-        : curriculum.month_4?.melchizedek || [];
+    const month4Track = curriculum.month_4?.[selectedOffice] || [];
     const month4 = month4Track.map((item) => ({
       id: item.day,
       scripture: item.scripture || "",
@@ -403,7 +405,7 @@ export function MissionProvider({ children }) {
       url: item.url || ""
     }));
     return [...starter, ...month1, ...month2, ...month3, ...month4];
-  }, [priesthoodOrder, selectedOffice]);
+  }, [commonStarter, priesthoodOrder, selectedOffice]);
 
   const resolvePhaseCompletion = (overallDay) => {
     const trackLabel =
@@ -511,8 +513,7 @@ export function MissionProvider({ children }) {
       }
     }
     if (month === 2) {
-      const trackKey = priesthoodOrder === "Aaronic" ? "gatekeeper" : "healer";
-      const entry = curriculum.month_2?.[trackKey]?.find(
+      const entry = curriculum.month_2?.[selectedOffice]?.find(
         (item) => item.day === day + labelDayOffset
       );
       if (entry) {
@@ -523,8 +524,7 @@ export function MissionProvider({ children }) {
       }
     }
     if (month === 3) {
-      const trackKey = priesthoodOrder === "Aaronic" ? "aaronic" : "melchizedek";
-      const entry = curriculum.month_3?.[trackKey]?.find(
+      const entry = curriculum.month_3?.[selectedOffice]?.find(
         (item) => item.day === day + labelDayOffset
       );
       if (entry) {
@@ -535,8 +535,7 @@ export function MissionProvider({ children }) {
       }
     }
     if (month === 4) {
-      const trackKey = priesthoodOrder === "Aaronic" ? "aaronic" : "melchizedek";
-      const entry = curriculum.month_4?.[trackKey]?.find(
+      const entry = curriculum.month_4?.[selectedOffice]?.find(
         (item) => item.day === day + labelDayOffset
       );
       if (entry) {

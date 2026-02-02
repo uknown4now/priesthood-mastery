@@ -20,9 +20,14 @@ export default function Path({
   onCatchUpStartConsumed
 }) {
   const officeEntries = Object.entries(offices);
-  const officeLabel = selectedOffice
-    ? selectedOffice.charAt(0).toUpperCase() + selectedOffice.slice(1)
-    : "";
+  const formatOfficeLabel = (value) =>
+    value
+      ? value
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ")
+      : "";
+  const officeLabel = formatOfficeLabel(selectedOffice);
   const currentDay = activeDay || 1;
   const [selectedDay, setSelectedDay] = useState(null);
   const [reflectionText, setReflectionText] = useState("");
@@ -69,9 +74,9 @@ export default function Path({
   const showMonthDetail = expandedMonth !== null;
   const monthTitles = {
     1: "The Scriptural Priesthood",
-    2: priesthoodOrder === "Melchizedek" ? "The Healer" : "The Gatekeeper",
-    3: priesthoodOrder === "Melchizedek" ? "The Shepherd" : "The Watchman",
-    4: priesthoodOrder === "Melchizedek" ? "The Patriarch" : "The Preparer"
+    2: priesthoodOrder === "Melchizedek" ? "Elder" : "Deacon",
+    3: priesthoodOrder === "Melchizedek" ? "High Priest / Leader" : "Teacher",
+    4: priesthoodOrder === "Melchizedek" ? "Melchizedek" : "Priest"
   };
   const masteryDaysByMonth = { 1: 28, 2: 28, 3: 28, 4: 29 };
   const daysInExpandedMonth = masteryDaysByMonth[expandedMonth] || 28;
@@ -142,7 +147,7 @@ export default function Path({
                 onClick={() => onSelectOffice(key)}
                 className="rounded-xl border border-white/10 bg-[rgba(var(--color-surface),0.8)] px-3 py-3 text-sm font-semibold text-gray-100 transition hover:border-gold-500/60 hover:bg-gold-500/10"
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {formatOfficeLabel(key)}
               </button>
             ))}
           </div>

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import HabitMomentumCircles from "../components/HabitMomentumCircles.jsx";
 
 const REMINDER_KEY = "priesthood.remindersEnabled";
-const OFFICE_OPTIONS = ["deacon", "teacher", "priest", "elder"];
+const OFFICE_OPTIONS = ["deacon", "teacher", "priest", "elder", "high_Priest"];
 
 export default function Profile({
   isCompletedToday,
@@ -16,6 +16,13 @@ export default function Profile({
   phaseStatus,
   habitTotals
 }) {
+  const formatOfficeLabel = (value) =>
+    value
+      ? value
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ")
+      : "Unassigned";
   const [enabled, setEnabled] = useState(() =>
     typeof window === "undefined"
       ? false
@@ -175,7 +182,7 @@ export default function Profile({
           </option>
           {OFFICE_OPTIONS.map((office) => (
             <option key={office} value={office}>
-              {office.charAt(0).toUpperCase() + office.slice(1)}
+              {formatOfficeLabel(office)}
             </option>
           ))}
         </select>
@@ -189,9 +196,7 @@ export default function Profile({
           <div className="flex items-center justify-between">
             <span>Current Rank</span>
             <span className="font-semibold text-white">
-              {selectedOffice
-                ? selectedOffice.charAt(0).toUpperCase() + selectedOffice.slice(1)
-                : "Unassigned"}
+              {formatOfficeLabel(selectedOffice)}
             </span>
           </div>
           <div className="flex items-center justify-between">
